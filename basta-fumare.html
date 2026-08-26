@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Resisti</title>
+<style>
+  :root{
+    --bg: #14171A;
+    --bg-raised: #1D2125;
+    --bg-raised2: #23282D;
+    --ember: #E8481C;
+    --ember-soft: rgba(232,72,28,0.16);
+    --calm: #3EB489;
+    --calm-soft: rgba(62,180,137,0.14);
+    --blue: #4E9BE8;
+    --blue-soft: rgba(78,155,232,0.14);
+    --gold: #E8B84E;
+    --gold-soft: rgba(232,184,78,0.14);
+    --ink: #F2F0EA;
+    --ink-dim: #9BA3AB;
+    --ink-faint: #5C6369;
+    --line: #2A2F34;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    overflow-x:hidden;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+    position:relative;
+  }
+  a{color:inherit;}
+
+  /* ---------- SETUP SCREEN ---------- */
+  .setup{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:18px;
+    padding-top:12px;
+    padding-bottom:24px;
+  }
+  .setup h1{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin:0 0 4px;
+  }
+  .setup p.sub{
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.5;
+    margin:0 0 6px;
+  }
+  .section-label{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--ink-faint);
+    font-weight:800;
+    margin: 6px 0 -4px;
+  }
+  .section-sub{
+    font-size:12.5px;
+    color:var(--ink-faint);
+    line-height:1.5;
+    margin:-2px 0 2px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .field label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-faint);
+    font-weight:700;
+  }
+  .field input, .field textarea, .field select{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-size:16px;
+    font-weight:600;
+    padding:13px 14px;
+    border-radius:10px;
+    font-family:inherit;
+    width:100%;
+  }
+  .field textarea{resize:none; font-weight:500; line-height:1.4;}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:2px solid var(--ember); outline-offset:1px;}
+  .row2{display:flex; gap:12px;}
+  .row2 .field{flex:1;}
+  .btn-primary{
+    background:var(--ember);
+    color:#fff;
+    border:none;
+    padding:16px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .btn-primary:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+
+  .plan-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .plan-row select{flex:0 0 128px; font-size:13px; padding:12px 8px;}
+  .plan-row input{flex:1; font-size:13.5px;}
+  .plan-tpl{font-size:11px; color:var(--ink-faint); margin:-4px 0 2px;}
+
+  .support-card{
+    background:var(--blue-soft);
+    border:1px solid rgba(78,155,232,0.35);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.55;
+  }
+  .support-card .lbl{
+    display:block;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--blue);
+    font-weight:800;
+    margin-bottom:6px;
+  }
+  .support-card a.tel{
+    display:inline-block;
+    margin-top:8px;
+    background:var(--blue);
+    color:#0B1520;
+    font-weight:800;
+    text-decoration:none;
+    padding:9px 14px;
+    border-radius:9px;
+    font-size:13px;
+  }
+
+  /* ---------- MAIN SCREEN ---------- */
+  .main{display:none; flex:1; flex-direction:column;}
+  .main.active{display:flex;}
+
+  .stats{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:10px;
+    margin-bottom: 14px;
+  }
+  .stat{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 8px;
+    text-align:center;
+  }
+  .stat .num{
+    font-size:19px;
+    font-weight:800;
+    font-variant-numeric: tabular-nums;
+    line-height:1.1;
+  }
+  .stat .label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-faint);
+    margin-top:4px;
+    font-weight:700;
+  }
+
+  .insight{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    text-align:center;
+    margin-bottom:8px;
+    display:none;
+  }
+  .insight.show{display:block;}
+  .insight b{color:var(--ink);}
+
+  .core{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+  }
+
+  .why-card{
+    background:var(--gold-soft);
+    border:1px solid rgba(232,184,78,0.35);
+    border-radius:12px;
+    padding:12px 16px;
+    text-align:center;
+    font-size:13px;
+    color:var(--ink);
+    max-width:320px;
+    display:none;
+  }
+  .why-card.show{display:block;}
+  .why-card .lbl{
+    display:block;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    font-weight:800;
+    margin-bottom:4px;
+  }
+
+  .streak-line{
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:13px;
+  }
+  .streak-line b{color:var(--ink); font-weight:700;}
+
+  #panicBtn{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    background: radial-gradient(circle at 32% 28%, #ff6a3c, var(--ember) 68%);
+    border:none;
+    color:#fff;
+    font-size:18px;
+    font-weight:800;
+    line-height:1.25;
+    cursor:pointer;
+    box-shadow: 0 0 0 8px var(--ember-soft), 0 18px 40px -14px rgba(232,72,28,0.6);
+    padding:0 20px;
+  }
+  #panicBtn:active{transform:scale(0.97);}
+  #panicBtn:focus-visible{outline:3px solid #fff; outline-offset:4px;}
+
+  .hint{
+    color:var(--ink-faint);
+    font-size:12.5px;
+    text-align:center;
+    max-width:280px;
+  }
+
+  .main .support-card{margin-top:14px;}
+
+  .footer-links{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-top:16px;
+  }
+  .footer-links button{
+    background:none;
+    border:none;
+    color:var(--ink-faint);
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:inherit;
+    padding:6px;
+  }
+
+  /* ---------- CRAVING OVERLAY ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    z-index:50;
+    display:none;
+    flex-direction:column;
+    overflow-y:auto;
+    padding: 20px 20px calc(90px + env(safe-area-inset-bottom));
+  }
+  .overlay.active{display:flex;}
+
+  .overlay-top{
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .overlay-top .eyebrow{
+    color:var(--ember);
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .overlay-top .timer{
+    font-variant-numeric: tabular-nums;
+    font-size:14px;
+    color:var(--ink-dim);
+    margin-top:6px;
+  }
+  .overlay-top .phrase{
+    font-size:18px;
+    font-weight:700;
+    line-height:1.4;
+    letter-spacing:-0.01em;
+    margin-top:12px;
+  }
+
+  .overlay-why{
+    background:var(--gold-soft);
+    border:1px solid rgba(232,184,78,0.35);
+    border-radius:12px;
+    padding:12px 14px;
+    text-align:center;
+    font-size:13px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .overlay-why.show{display:block;}
+  .overlay-why .lbl{
+    display:block;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    font-weight:800;
+    margin-bottom:4px;
+  }
+
+  .trigger-section{margin-bottom:16px;}
+  .trigger-section .st{
+    font-size:12px;
+    color:var(--ink-faint);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    font-weight:700;
+    margin-bottom:10px;
+    text-align:center;
+  }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+  }
+  .chip{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    padding:8px 13px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .chip.selected{
+    background:var(--ember-soft);
+    border-color:var(--ember);
+    color:var(--ember);
+  }
+
+  .plan-match{
+    background:var(--calm-soft);
+    border:1px solid rgba(62,180,137,0.4);
+    border-radius:12px;
+    padding:13px 15px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .plan-match.show{display:block;}
+  .plan-match .lbl{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--calm);
+    font-weight:800;
+    margin-bottom:4px;
+    display:block;
+  }
+  .plan-match .txt{font-size:14px; font-weight:700; color:var(--ink);}
+
+  .tech-grid{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:6px;
+  }
+  .tech-card{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .tech-card.open{border-color: var(--calm);}
+  .tech-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .tech-title{
+    font-size:15.5px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tech-badge{
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:3px 8px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .badge-alta{background:var(--calm-soft); color:var(--calm);}
+  .badge-media{background:var(--blue-soft); color:var(--blue);}
+  .badge-bassa{background:rgba(156,163,171,0.14); color:var(--ink-dim);}
+  .tech-body{
+    display:none;
+    margin-top:12px;
+    font-size:13.5px;
+    color:var(--ink-dim);
+    line-height:1.55;
+  }
+  .tech-card.open .tech-body{display:block;}
+
+  .breath-wrap{
+    width:150px;
+    height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    margin:16px auto;
+  }
+  .breath-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1.5px solid rgba(62,180,137,0.35);
+  }
+  .breath-circle{
+    width:82px;
+    height:82px;
+    border-radius:50%;
+    background: radial-gradient(circle at 34% 30%, #63d6ac, var(--calm) 70%);
+    box-shadow: 0 0 40px -6px rgba(62,180,137,0.65);
+    transition: transform 4s ease-in-out;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#08201a;
+    font-weight:800;
+    font-size:12.5px;
+  }
+  .breath-circle.expand{transform:scale(1.55);}
+
+  .move-timer{
+    font-size:38px;
+    font-weight:800;
+    text-align:center;
+    font-variant-numeric: tabular-nums;
+    margin: 6px 0 4px;
+    color:var(--calm);
+  }
+  .move-list{margin:8px 0 0; padding-left:18px;}
+  .move-list li{margin-bottom:4px;}
+
+  .mini-btn{
+    background:var(--bg-raised2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+  }
+
+  .overlay-actions{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    display:flex;
+    justify-content:center;
+    padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(20,23,26,0) 0%, var(--bg) 30%);
+    z-index:51;
+  }
+  .overlay-actions-inner{
+    width:100%;
+    max-width:440px;
+    display:flex;
+    gap:10px;
+  }
+  .btn-resisted{
+    flex:1;
+    background:var(--calm);
+    color:#0A1F17;
+    border:none;
+    padding:15px;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .btn-smoked{
+    background:transparent;
+    color:var(--ink-faint);
+    border:1px solid var(--line);
+    padding:15px 16px;
+    border-radius:12px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-resisted:focus-visible, .btn-smoked:focus-visible{outline:3px solid var(--calm); outline-offset:2px;}
+
+  .note{
+    font-size:11px;
+    color:var(--ink-faint);
+    text-align:center;
+    margin-top:16px;
+    line-height:1.5;
+  }
+
+  /* toast */
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--bg-raised2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-weight:600;
+    opacity:0;
+    transition: all 0.25s ease;
+    z-index:100;
+    pointer-events:none;
+    max-width:88%;
+    text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    .breath-circle{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SETUP -->
+  <div class="setup" id="setup">
+    <div>
+      <h1>Basta fumare.</h1>
+      <p class="sub">Non ti servono frasi zuccherose. Ti serve un piano pronto per quando il craving esplode — dura in media 3-5 minuti e si esaurisce quasi sempre entro 20. Compila e via.</p>
+    </div>
+    <div class="field">
+      <label for="quitDate">Da quando non fumi (data e ora)</label>
+      <input type="datetime-local" id="quitDate">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="perDay">Sigarette/giorno prima</label>
+        <input type="number" id="perDay" inputmode="numeric" value="15" min="1">
+      </div>
+      <div class="field">
+        <label for="cigsPerPack">Sigarette/pacchetto</label>
+        <input type="number" id="cigsPerPack" inputmode="numeric" value="20" min="1">
+      </div>
+    </div>
+    <div class="field">
+      <label for="pricePerPack">Prezzo pacchetto (€)</label>
+      <input type="number" id="pricePerPack" inputmode="decimal" value="6.00" step="0.10" min="0">
+    </div>
+
+    <div class="section-label">Il tuo motivo (facoltativo)</div>
+    <div class="section-sub">Immaginare in modo vivido e specifico un beneficio futuro concreto riduce il craving più di un motivo generico. Scrivi qualcosa di specifico, non "per la salute".</div>
+    <div class="field">
+      <textarea id="whyText" rows="2" placeholder="Es: tra 6 mesi voglio salire le scale senza restare senza fiato. Es: con i soldi risparmiati mi pago il weekend a ___."></textarea>
+    </div>
+
+    <div class="section-label">Piani "se-allora" (facoltativo)</div>
+    <div class="section-sub">Decidere ORA cosa farai in una situazione specifica funziona meglio che deciderlo durante il craving. Collega una situazione a un'azione concreta.</div>
+    <div class="plan-tpl" id="planTpl1">Se Stress → allora...</div>
+    <div class="plan-row">
+      <select class="plan-trigger" data-i="1"></select>
+      <input type="text" class="plan-action" data-i="1" placeholder="es: esco a camminare 5 minuti">
+    </div>
+    <div class="plan-tpl" id="planTpl2">Se Dopo pasto → allora...</div>
+    <div class="plan-row">
+      <select class="plan-trigger" data-i="2"></select>
+      <input type="text" class="plan-action" data-i="2" placeholder="es: lavo subito i denti">
+    </div>
+    <div class="plan-tpl" id="planTpl3">Se Alcol/social → allora...</div>
+    <div class="plan-row">
+      <select class="plan-trigger" data-i="3"></select>
+      <input type="text" class="plan-action" data-i="3" placeholder="es: tengo in mano il bicchiere con l'altra mano">
+    </div>
+
+    <button class="btn-primary" id="saveSetup">Inizia</button>
+
+    <div class="support-card">
+      <span class="lbl">Prima ancora dell'app</span>
+      Il salto di efficacia più grande non viene da un'app: farmaco (NRT, vareniclina) più supporto professionale porta il tasso di successo dal 3-6% (da soli) al 25-30% a un anno. Parlane con un medico o chiama il Telefono Verde contro il Fumo dell'ISS — gratuito, anonimo, lun-ven 10-16.
+      <br><a class="tel" href="tel:800554088">📞 Chiama 800 554 088</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+    <div class="stats">
+      <div class="stat"><div class="num" id="statTime">0h</div><div class="label">Senza fumo</div></div>
+      <div class="stat"><div class="num" id="statMoney">€0</div><div class="label">Risparmiati</div></div>
+      <div class="stat"><div class="num" id="statCigs">0</div><div class="label">Non fumate</div></div>
+    </div>
+
+    <div class="insight" id="insight"></div>
+
+    <div class="core">
+      <div class="why-card" id="whyCard"><span class="lbl">Il tuo motivo</span><span id="whyCardText"></span></div>
+      <div class="streak-line" id="resistedLine"></div>
+      <button id="panicBtn">MI VIENE<br>VOGLIA</button>
+      <div class="hint">Premi qui appena senti il bisogno. Non aspettare di essere già debole.</div>
+    </div>
+
+    <div class="support-card">
+      <span class="lbl">Supporto professionale</span>
+      Farmaco + counseling batte nettamente il "farlo da solo". Telefono Verde contro il Fumo (ISS), gratuito e anonimo, lun-ven 10-16.
+      <br><a class="tel" href="tel:800554088">📞 800 554 088</a>
+    </div>
+
+    <div class="footer-links">
+      <button id="editSetup">Modifica dati</button>
+      <button id="resetAll">Azzera tutto</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- CRAVING OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="overlay-top">
+    <div class="eyebrow">Craving in corso</div>
+    <div class="timer" id="cravingTimer">0:00 dall'inizio</div>
+    <div class="phrase" id="phraseText">—</div>
+  </div>
+
+  <div class="overlay-why" id="overlayWhy"><span class="lbl">Non dimenticare</span><span id="overlayWhyText"></span></div>
+
+  <div class="trigger-section">
+    <div class="st">Cosa l'ha scatenato?</div>
+    <div class="chip-row" id="triggerChips">
+      <div class="chip" data-trigger="Stress">Stress</div>
+      <div class="chip" data-trigger="Noia">Noia</div>
+      <div class="chip" data-trigger="Dopo pasto">Dopo pasto</div>
+      <div class="chip" data-trigger="Pausa/abitudine">Pausa/abitudine</div>
+      <div class="chip" data-trigger="Alcol/social">Alcol/social</div>
+      <div class="chip" data-trigger="Caffè">Caffè</div>
+      <div class="chip" data-trigger="Auto/guida">Auto/guida</div>
+      <div class="chip" data-trigger="Senza motivo">Senza motivo</div>
+    </div>
+  </div>
+
+  <div class="plan-match" id="planMatch"><span class="lbl">Il tuo piano per questo momento</span><span class="txt" id="planMatchText"></span></div>
+
+  <div class="tech-grid">
+
+    <div class="tech-card" data-tech="muovi" id="card-muovi">
+      <div class="tech-head">
+        <div class="tech-title">🏃 Muoviti 60 secondi</div>
+        <div class="tech-badge badge-alta">Evidenza: forte</div>
+      </div>
+      <div class="tech-body">
+        <p>Anche un solo minuto di attività fisica riduce il craving in modo misurabile, per circa 30 minuti. È la tecnica con il supporto scientifico più solido tra quelle qui dentro.</p>
+        <div class="move-timer" id="moveTimer">0:60</div>
+        <ul class="move-list">
+          <li>10 piegamenti o squat veloci</li>
+          <li>Stringi un oggetto (o il pugno) più forte che puoi, 20 secondi, rilascia, ripeti</li>
+          <li>Sali/scendi le scale, o cammina a passo svelto</li>
+        </ul>
+        <button class="mini-btn" id="startMove">Avvia i 60 secondi</button>
+      </div>
+    </div>
+
+    <div class="tech-card" data-tech="aspetta" id="card-aspetta">
+      <div class="tech-head">
+        <div class="tech-title">⏳ Aspetta e respira</div>
+        <div class="tech-badge badge-media">Evidenza: media</div>
+      </div>
+      <div class="tech-body">
+        <p>Il craving è un'onda: sale, arriva al picco (in genere entro 3-5 minuti) e poi scende da sola, che tu fumi o no. Non devi vincerlo per sempre, solo restare a galla fino al picco.</p>
+        <div class="breath-wrap">
+          <div class="breath-ring"></div>
+          <div class="breath-circle" id="breathCircle">Inspira</div>
+        </div>
+        <p style="text-align:center; font-size:12px; color:var(--ink-faint); margin-top:-4px;">La respirazione lenta da sola ha prove deboli sul craving specifico, ma aiuta a restare fermo mentre aspetti.</p>
+      </div>
+    </div>
+
+    <div class="tech-card" data-tech="futuro" id="card-futuro">
+      <div class="tech-head">
+        <div class="tech-title">🔭 Proiettati avanti</div>
+        <div class="tech-badge badge-media">Evidenza: media</div>
+      </div>
+      <div class="tech-body">
+        <p>Immaginare in modo dettagliato e vivido un evento futuro specifico (non generico) riduce sia il craving sia la tendenza a svalutare i benefici a lungo termine rispetto alla gratificazione immediata. Chiudi gli occhi 30 secondi e immagina in dettaglio, con colori, suoni, chi c'è intorno a te:</p>
+        <p style="font-weight:700; color:var(--ink); margin-top:8px;" id="futuroWhy">Il momento specifico che hai scritto nel tuo "motivo".</p>
+      </div>
+    </div>
+
+    <div class="tech-card" data-tech="distrai" id="card-distrai">
+      <div class="tech-head">
+        <div class="tech-title">🎯 Distraiti</div>
+        <div class="tech-badge badge-media">Evidenza: media</div>
+      </div>
+      <div class="tech-body">
+        <p>Spostare l'attenzione altrove per qualche minuto è una delle strategie più citate nelle linee guida per smettere. Semplice, funziona meglio se decidi ORA cosa fare:</p>
+        <ul class="move-list">
+          <li>Chiama o scrivi a qualcuno, due minuti</li>
+          <li>Lavati i denti o mastica una gomma</li>
+          <li>Bevi un bicchiere d'acqua lentamente</li>
+          <li>Cambia stanza o esci a fare due passi</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">Tracciare i trigger e avere un piano pronto per ciascuno sono tra le funzioni più raccomandate negli studi sulle app per smettere di fumare. Le app da sole hanno prove di efficacia deboli e incostanti — quello che conta è quanto e quanto spesso le usi davvero, e se le affianchi a farmaco/supporto professionale.</div>
+
+  <div class="overlay-actions">
+    <div class="overlay-actions-inner">
+      <button class="btn-resisted" id="btnResisted">Ho resistito →</button>
+      <button class="btn-smoked" id="btnSmoked">Ho fumato</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+
+  const PHRASES = [
+    "Non ti serve forza di volontà infinita. Ti servono solo questi minuti.",
+    "Ogni craving che superi rende il prossimo più debole. È biologia, non magia.",
+    "Non stai smettendo per sempre in questo momento. Stai solo non fumando adesso.",
+    "Il corpo sta solo chiedendo nicotina. Tu decidi se rispondere.",
+    "Fra pochi minuti non ricorderai nemmeno perché era così urgente.",
+    "Hai già smesso una volta oggi. Fallo di nuovo, adesso.",
+    "Nessuna sigaretta ha mai risolto un problema. Ha solo rimandato il craving successivo.",
+    "Il picco del desiderio è già in discesa mentre lo leggi.",
+    "Non è la tua ultima occasione di fumare. È la tua prossima occasione di non farlo.",
+    "Stai allenando un muscolo. Ogni resistenza lo rinforza.",
+    "Il te di domani ringrazia il te di adesso, non il contrario.",
+    "Non devi vincere per sempre. Devi solo vincere questi minuti.",
+    "La voglia è reale. Ma è anche temporanea. Aspettala, non obbedirle.",
+    "Non stai perdendo niente restando fermo. Il craving passa comunque, con o senza sigaretta.",
+    "Muoviti. Anche un minuto di movimento abbassa il craving più di quanto pensi.",
+    "Il cervello sconta il futuro come se non contasse. Non lasciarglielo fare.",
+    "Hai già deciso cosa fare in questo momento, prima ancora che arrivasse. Fallo.",
+    "Nessuno controlla se cedi. Ma tu sì, e te lo ricorderai domani.",
+    "Il craving non aumenta all'infinito. Ha un tetto, e lo stai già toccando.",
+    "Ogni volta che resisti, il prossimo craving arriva più tardi e pesa meno.",
+    "Se hai già ceduto altre volte, non significa niente su questa volta.",
+    "Non stai facendolo da solo per forza. Un farmaco o una telefonata possono raddoppiare le tue probabilità."
+  ];
+
+  const TRIGGER_LABELS = ["Stress","Noia","Dopo pasto","Pausa/abitudine","Alcol/social","Caffè","Auto/guida","Senza motivo"];
+  const SETTINGS_KEY = 'smk_settings';
+  const LOG_KEY = 'smk_log';
+
+  let state = { settings: null, resisted: 0, smoked: 0, triggers: {} };
+  let cravingStart = null;
+  let breathTimer = null;
+  let timerInterval = null;
+  let statsInterval = null;
+  let moveInterval = null;
+  let selectedTrigger = null;
+
+  const $ = id => document.getElementById(id);
+
+  function toast(msg){
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  function populateTriggerSelects(){
+    document.querySelectorAll('.plan-trigger').forEach(sel=>{
+      sel.innerHTML = '';
+      TRIGGER_LABELS.forEach(t=>{
+        const opt = document.createElement('option');
+        opt.value = t; opt.textContent = t;
+        sel.appendChild(opt);
+      });
+    });
+    const rows = document.querySelectorAll('.plan-trigger');
+    if(rows[0]) rows[0].value = "Stress";
+    if(rows[1]) rows[1].value = "Dopo pasto";
+    if(rows[2]) rows[2].value = "Alcol/social";
+    updatePlanTpls();
+    document.querySelectorAll('.plan-trigger').forEach(sel=>{
+      sel.addEventListener('change', updatePlanTpls);
+    });
+  }
+
+  function updatePlanTpls(){
+    document.querySelectorAll('.plan-row').forEach((row, idx)=>{
+      const sel = row.querySelector('.plan-trigger');
+      const tpl = document.getElementById('planTpl' + (idx+1));
+      if(sel && tpl) tpl.textContent = 'Se ' + sel.value + ' → allora...';
+    });
+  }
+
+  function loadState(){
+    try{
+      const s = localStorage.getItem(SETTINGS_KEY);
+      if(s) state.settings = JSON.parse(s);
+    }catch(e){}
+    try{
+      const l = localStorage.getItem(LOG_KEY);
+      if(l){
+        const parsed = JSON.parse(l);
+        state.resisted = parsed.resisted || 0;
+        state.smoked = parsed.smoked || 0;
+        state.triggers = parsed.triggers || {};
+      }
+    }catch(e){}
+  }
+
+  function saveSettings(){
+    try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings)); }
+    catch(e){ toast("Non sono riuscito a salvare i dati su questo dispositivo."); }
+  }
+
+  function saveLog(){
+    try{ localStorage.setItem(LOG_KEY, JSON.stringify({resisted: state.resisted, smoked: state.smoked, triggers: state.triggers})); }
+    catch(e){ toast("Non sono riuscito a salvare il log."); }
+  }
+
+  function fmtTimeSince(ms){
+    if(ms < 0) ms = 0;
+    const totalMin = Math.floor(ms/60000);
+    const days = Math.floor(totalMin/1440);
+    const hours = Math.floor((totalMin%1440)/60);
+    const mins = totalMin%60;
+    if(days > 0) return days + "g " + hours + "h";
+    if(hours > 0) return hours + "h " + mins + "m";
+    return mins + "m";
+  }
+
+  function updateStats(){
+    if(!state.settings) return;
+    const quitTime = new Date(state.settings.quitDate).getTime();
+    const now = Date.now();
+    const elapsedMs = now - quitTime;
+    const elapsedMin = Math.max(0, elapsedMs/60000);
+    const elapsedDays = elapsedMin/1440;
+
+    const perDay = parseFloat(state.settings.perDay) || 0;
+    const cigsPerPack = parseFloat(state.settings.cigsPerPack) || 20;
+    const pricePerPack = parseFloat(state.settings.pricePerPack) || 0;
+    const pricePerCig = cigsPerPack > 0 ? pricePerPack / cigsPerPack : 0;
+
+    let cigsAvoided = elapsedDays * perDay - state.smoked;
+    if(cigsAvoided < 0) cigsAvoided = 0;
+    const moneySaved = cigsAvoided * pricePerCig;
+
+    $('statTime').textContent = fmtTimeSince(elapsedMs);
+    $('statMoney').textContent = '€' + moneySaved.toFixed(0);
+    $('statCigs').textContent = Math.floor(cigsAvoided);
+
+    $('resistedLine').innerHTML = state.resisted > 0
+      ? 'Hai resistito <b>' + state.resisted + '</b> volt' + (state.resisted===1?'a':'e') + ' finora.'
+      : 'Ogni volta che resisti, lo segni qui.';
+
+    if(state.settings.why && state.settings.why.trim()){
+      $('whyCardText').textContent = state.settings.why.trim();
+      $('whyCard').classList.add('show');
+    } else {
+      $('whyCard').classList.remove('show');
+    }
+
+    updateInsight();
+  }
+
+  function updateInsight(){
+    const el = $('insight');
+    const entries = Object.entries(state.triggers || {});
+    if(entries.length < 3){ el.classList.remove('show'); return; }
+    entries.sort((a,b)=>b[1]-a[1]);
+    const top = entries[0];
+    const plans = (state.settings && state.settings.plans) || [];
+    const hasPlan = plans.some(p => p.trigger === top[0] && p.action && p.action.trim());
+    let msg = 'Il trigger più frequente finora: <b>' + top[0] + '</b> (' + top[1] + ' volte).';
+    msg += hasPlan ? ' Hai già un piano per questo caso.' : ' Non hai ancora un piano per questo caso — aggiungine uno in "Modifica dati".';
+    el.innerHTML = msg;
+    el.classList.add('show');
+  }
+
+  function showMain(){
+    $('setup').style.display = 'none';
+    $('main').classList.add('active');
+    updateStats();
+    if(statsInterval) clearInterval(statsInterval);
+    statsInterval = setInterval(updateStats, 30000);
+  }
+
+  function prefillSetup(){
+    populateTriggerSelects();
+    if(state.settings){
+      $('quitDate').value = state.settings.quitDate;
+      $('perDay').value = state.settings.perDay;
+      $('cigsPerPack').value = state.settings.cigsPerPack;
+      $('pricePerPack').value = state.settings.pricePerPack;
+      $('whyText').value = state.settings.why || '';
+      const plans = state.settings.plans || [];
+      document.querySelectorAll('.plan-row').forEach((row, idx)=>{
+        const p = plans[idx];
+        if(p){
+          row.querySelector('.plan-trigger').value = p.trigger;
+          row.querySelector('.plan-action').value = p.action;
+        }
+      });
+      updatePlanTpls();
+    } else {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      $('quitDate').value = now.toISOString().slice(0,16);
+    }
+  }
+
+  $('saveSetup').addEventListener('click', ()=>{
+    const quitDate = $('quitDate').value;
+    if(!quitDate){ toast("Serve una data di partenza."); return; }
+    const plans = [];
+    document.querySelectorAll('.plan-row').forEach(row=>{
+      const trigger = row.querySelector('.plan-trigger').value;
+      const action = row.querySelector('.plan-action').value.trim();
+      if(action) plans.push({trigger, action});
+    });
+    state.settings = {
+      quitDate: quitDate,
+      perDay: $('perDay').value || 15,
+      cigsPerPack: $('cigsPerPack').value || 20,
+      pricePerPack: $('pricePerPack').value || 6,
+      why: $('whyText').value.trim(),
+      plans: plans
+    };
+    saveSettings();
+    showMain();
+  });
+
+  $('editSetup').addEventListener('click', ()=>{
+    prefillSetup();
+    $('main').classList.remove('active');
+    $('setup').style.display = 'flex';
+    if(statsInterval) clearInterval(statsInterval);
+  });
+
+  $('resetAll').addEventListener('click', ()=>{
+    if(!confirm("Azzerare data di inizio e statistiche? (Il motivo e i piani restano.)")) return;
+    state.resisted = 0;
+    state.smoked = 0;
+    state.triggers = {};
+    saveLog();
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    state.settings.quitDate = now.toISOString().slice(0,16);
+    saveSettings();
+    updateStats();
+    toast("Azzerato. Si riparte da adesso.");
+  });
+
+  // ---------- TECH CARDS ----------
+  document.querySelectorAll('.tech-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('#startMove')) return;
+      const isOpen = card.classList.contains('open');
+      document.querySelectorAll('.tech-card').forEach(c=>c.classList.remove('open'));
+      if(!isOpen) card.classList.add('open');
+    });
+  });
+
+  $('startMove').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    let secs = 60;
+    const timerEl = $('moveTimer');
+    const btn = $('startMove');
+    btn.disabled = true;
+    btn.textContent = "In corso...";
+    if(moveInterval) clearInterval(moveInterval);
+    moveInterval = setInterval(()=>{
+      secs--;
+      timerEl.textContent = "0:" + (secs<10?'0':'')+secs;
+      if(secs <= 0){
+        clearInterval(moveInterval);
+        timerEl.textContent = "Fatto ✓";
+        btn.disabled = false;
+        btn.textContent = "Rifai i 60 secondi";
+      }
+    }, 1000);
+  });
+
+  // ---------- TRIGGER CHIPS ----------
+  document.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const already = chip.classList.contains('selected');
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+      if(!already){
+        chip.classList.add('selected');
+        selectedTrigger = chip.dataset.trigger;
+      } else {
+        selectedTrigger = null;
+      }
+      updatePlanMatch();
+    });
+  });
+
+  function updatePlanMatch(){
+    const el = $('planMatch');
+    if(!selectedTrigger || !state.settings || !state.settings.plans){
+      el.classList.remove('show');
+      return;
+    }
+    const plan = state.settings.plans.find(p => p.trigger === selectedTrigger);
+    if(plan){
+      $('planMatchText').textContent = plan.action;
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show');
+    }
+  }
+
+  // ---------- CRAVING OVERLAY ----------
+  function openCraving(){
+    cravingStart = Date.now();
+    selectedTrigger = null;
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.tech-card').forEach(c=>c.classList.remove('open'));
+    $('planMatch').classList.remove('show');
+    $('moveTimer').textContent = "0:60";
+    $('startMove').disabled = false;
+    $('startMove').textContent = "Avvia i 60 secondi";
+    $('overlay').classList.add('active');
+    $('overlay').scrollTop = 0;
+    $('phraseText').textContent = PHRASES[Math.floor(Math.random()*PHRASES.length)];
+
+    if(state.settings && state.settings.why && state.settings.why.trim()){
+      $('overlayWhyText').textContent = state.settings.why.trim();
+      $('overlayWhy').classList.add('show');
+      $('futuroWhy').textContent = state.settings.why.trim();
+    } else {
+      $('overlayWhy').classList.remove('show');
+      $('futuroWhy').textContent = 'Non hai ancora scritto un motivo specifico. Vai su "Modifica dati" per aggiungerlo — funziona meglio di un generico "per la salute".';
+    }
+
+    startBreathing();
+    startCravingTimer();
+  }
+
+  function closeCraving(){
+    $('overlay').classList.remove('active');
+    if(breathTimer) clearInterval(breathTimer);
+    if(timerInterval) clearInterval(timerInterval);
+    if(moveInterval) clearInterval(moveInterval);
+  }
+
+  function startBreathing(){
+    const circle = $('breathCircle');
+    let phase = 1;
+    circle.classList.add('expand');
+    circle.textContent = 'Inspira';
+    if(breathTimer) clearInterval(breathTimer);
+    breathTimer = setInterval(()=>{
+      if(phase === 1){
+        circle.classList.remove('expand');
+        circle.textContent = 'Espira';
+        phase = 0;
+      } else {
+        circle.classList.add('expand');
+        circle.textContent = 'Inspira';
+        phase = 1;
+      }
+    }, 4000);
+  }
+
+  function startCravingTimer(){
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{
+      const elapsed = Math.floor((Date.now()-cravingStart)/1000);
+      const m = Math.floor(elapsed/60);
+      const s = elapsed%60;
+      const label = elapsed < 300 ? "Picco atteso entro 3-5 min" : "Il picco dovrebbe essere passato";
+      $('cravingTimer').textContent = label + " · " + m + ":" + (s<10?'0':'')+s;
+    }, 1000);
+  }
+
+  function logTrigger(){
+    if(selectedTrigger){
+      state.triggers[selectedTrigger] = (state.triggers[selectedTrigger] || 0) + 1;
+    }
+  }
+
+  $('panicBtn').addEventListener('click', openCraving);
+
+  $('btnResisted').addEventListener('click', ()=>{
+    state.resisted += 1;
+    logTrigger();
+    saveLog();
+    updateStats();
+    closeCraving();
+    toast("Segnato. Un altro craving battuto.");
+  });
+
+  $('btnSmoked').addEventListener('click', ()=>{
+    state.smoked += 1;
+    logTrigger();
+    saveLog();
+    updateStats();
+    closeCraving();
+    toast("Segnato senza giudizio. Il prossimo craving riparte da qui.");
+  });
+
+  // ---------- INIT ----------
+  (function init(){
+    loadState();
+    if(state.settings && state.settings.quitDate){
+      showMain();
+    } else {
+      prefillSetup();
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
