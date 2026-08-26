@@ -401,6 +401,81 @@
   .ration-card .txt{font-size:13.5px; line-height:1.55; color:var(--ink);}
   .ration-card .txt b{color:var(--ember);}
 
+  .chat-messages{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:16px;
+    min-height:200px;
+  }
+  .chat-msg{
+    max-width:85%;
+    padding:11px 14px;
+    border-radius:14px;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .chat-msg.user{
+    align-self:flex-end;
+    background:var(--ember);
+    color:#fff;
+    border-bottom-right-radius:4px;
+  }
+  .chat-msg.assistant{
+    align-self:flex-start;
+    background:var(--bg-raised2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-bottom-left-radius:4px;
+  }
+  .chat-msg.typing{
+    color:var(--ink-faint);
+    font-style:italic;
+  }
+  .chat-input-row{
+    display:flex;
+    gap:8px;
+    position:sticky;
+    bottom:0;
+    background:var(--bg);
+    padding-top:8px;
+  }
+  .chat-input-row input{
+    flex:1;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-family:inherit;
+  }
+  .chat-input-row input:focus{outline:2px solid var(--ember); outline-offset:1px;}
+  .chat-send{
+    background:var(--ember);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:0 18px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .chat-gate{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:20px 0;
+  }
+  .chat-gate input{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-family:inherit;
+  }
+
   .plan-match{
     background:var(--calm-soft);
     border:1px solid rgba(62,180,137,0.4);
@@ -624,6 +699,10 @@
       <label for="pricePerPack">Prezzo pacchetto (€)</label>
       <input type="number" id="pricePerPack" inputmode="decimal" value="6.00" step="0.10" min="0">
     </div>
+    <div class="field">
+      <label for="fagerstrom">Punteggio Fagerström 0-10 (facoltativo, se l'hai già fatto)</label>
+      <input type="number" id="fagerstrom" inputmode="numeric" min="0" max="10" placeholder="es. 3">
+    </div>
 
     <div class="section-label">Il tuo motivo (facoltativo)</div>
     <div class="section-sub">Immaginare in modo vivido e specifico un beneficio futuro concreto riduce il craving più di un motivo generico. Scrivi qualcosa di specifico, non "per la salute".</div>
@@ -682,6 +761,8 @@
     </div>
 
     <div class="footer-links">
+      <button id="openCheckin">Check-in guidato</button>
+      <button id="openChat">Parla col consulente</button>
       <button id="editSetup">Modifica dati</button>
       <button id="resetAll">Azzera tutto</button>
     </div>
@@ -794,6 +875,81 @@
   </div>
 </div>
 
+<!-- CHECK-IN OVERLAY -->
+<div class="overlay" id="checkinOverlay">
+  <div class="overlay-top">
+    <div class="eyebrow">Check-in guidato</div>
+    <div class="phrase" style="font-size:15px; font-weight:500; color:var(--ink-dim); margin-top:10px;">Non è un consulente reale: nessuna valutazione clinica, nessun aggiustamento di terapia. Solo domande fisse che usano i tuoi dati per darti un riscontro, non un'intelligenza che ti risponde.</div>
+  </div>
+
+  <div class="trigger-section">
+    <div class="st">Come è andata oggi con la voglia di fumare?</div>
+    <div class="chip-row" id="moodChips">
+      <div class="chip" data-mood="Facile">Facile</div>
+      <div class="chip" data-mood="Normale">Normale</div>
+      <div class="chip" data-mood="Difficile">Difficile</div>
+    </div>
+  </div>
+
+  <div class="trigger-section">
+    <div class="st">Hai fumato, anche solo una volta, dall'ultimo check-in?</div>
+    <div class="chip-row" id="relapseChips">
+      <div class="chip" data-relapse="No">No</div>
+      <div class="chip" data-relapse="Sì">Sì</div>
+    </div>
+  </div>
+
+  <div class="plan-match show" id="checkinSummary" style="display:none;">
+    <span class="lbl">Riscontro basato sui tuoi dati</span>
+    <span class="txt" id="checkinSummaryText"></span>
+  </div>
+
+  <div class="note" id="checkinTrend"></div>
+
+  <div class="overlay-actions">
+    <div class="overlay-actions-inner">
+      <button class="btn-resisted" id="saveCheckin">Salva check-in</button>
+      <button class="btn-smoked" id="closeCheckin">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT CONSULENTE OVERLAY -->
+<div class="overlay" id="chatOverlay">
+  <div class="overlay-top">
+    <div class="eyebrow">Consulente virtuale</div>
+    <div class="phrase" style="font-size:14px; font-weight:500; color:var(--ink-dim); margin-top:10px;">Non è un medico né un consulente reale: nessuna diagnosi, nessuna terapia. Per farmaci o dubbi clinici, Telefono Verde 800 554088.</div>
+  </div>
+
+  <div id="chatGateView" class="chat-gate">
+    <div class="section-sub">La prima volta serve l'indirizzo del tuo proxy e la password che hai impostato su Vercel. Restano salvati solo su questo dispositivo.</div>
+    <div class="field">
+      <label for="proxyUrl">URL del proxy (es. https://tuo-progetto.vercel.app/api/counselor)</label>
+      <input type="text" id="proxyUrl" placeholder="https://...vercel.app/api/counselor">
+    </div>
+    <div class="field">
+      <label for="proxyPass">Password</label>
+      <input type="password" id="proxyPass" placeholder="La password impostata su Vercel">
+    </div>
+    <button class="btn-primary" id="saveGate">Connetti</button>
+  </div>
+
+  <div id="chatView" style="display:none;">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Scrivi qui...">
+      <button class="chat-send" id="chatSend">Invia</button>
+    </div>
+  </div>
+
+  <div class="overlay-actions">
+    <div class="overlay-actions-inner">
+      <button class="btn-smoked" id="closeChat" style="flex:1;">Chiudi</button>
+      <button class="btn-smoked" id="forgetGate">Dimentica connessione</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -827,8 +983,9 @@
   const TRIGGER_LABELS = ["Stress","Noia","Dopo pasto","Pausa/abitudine","Alcol/social","Caffè","Auto/guida","Senza motivo","Sto razionalizzando"];
   const SETTINGS_KEY = 'smk_settings';
   const LOG_KEY = 'smk_log';
+  const CHECKIN_KEY = 'smk_checkins';
 
-  let state = { settings: null, resisted: 0, smoked: 0, triggers: {} };
+  let state = { settings: null, resisted: 0, smoked: 0, triggers: {}, checkins: [] };
   let cravingStart = null;
   let breathTimer = null;
   let timerInterval = null;
@@ -886,6 +1043,10 @@
         state.triggers = parsed.triggers || {};
       }
     }catch(e){}
+    try{
+      const ck = localStorage.getItem(CHECKIN_KEY);
+      if(ck) state.checkins = JSON.parse(ck) || [];
+    }catch(e){}
   }
 
   function saveSettings(){
@@ -896,6 +1057,11 @@
   function saveLog(){
     try{ localStorage.setItem(LOG_KEY, JSON.stringify({resisted: state.resisted, smoked: state.smoked, triggers: state.triggers})); }
     catch(e){ toast("Non sono riuscito a salvare il log."); }
+  }
+
+  function saveCheckins(){
+    try{ localStorage.setItem(CHECKIN_KEY, JSON.stringify(state.checkins.slice(-30))); }
+    catch(e){ toast("Non sono riuscito a salvare il check-in."); }
   }
 
   function fmtTimeSince(ms){
@@ -974,6 +1140,9 @@
       $('cigsPerPack').value = state.settings.cigsPerPack;
       $('pricePerPack').value = state.settings.pricePerPack;
       $('whyText').value = state.settings.why || '';
+      if(state.settings.fagerstrom !== undefined && state.settings.fagerstrom !== null){
+        $('fagerstrom').value = state.settings.fagerstrom;
+      }
       const plans = state.settings.plans || [];
       document.querySelectorAll('.plan-row').forEach((row, idx)=>{
         const p = plans[idx];
@@ -1005,6 +1174,7 @@
       cigsPerPack: $('cigsPerPack').value || 20,
       pricePerPack: $('pricePerPack').value || 6,
       why: $('whyText').value.trim(),
+      fagerstrom: $('fagerstrom').value ? parseInt($('fagerstrom').value, 10) : null,
       plans: plans
     };
     saveSettings();
@@ -1184,6 +1354,250 @@
     updateStats();
     closeCraving();
     toast("Segnato senza giudizio. Il prossimo craving riparte da qui.");
+  });
+
+  // ---------- CHECK-IN GUIDATO ----------
+  let selectedMood = null;
+  let selectedRelapse = null;
+
+  function fagerstromTierText(score){
+    if(score === null || score === undefined || isNaN(score)) return null;
+    if(score <= 2) return "Il tuo punteggio Fagerström (" + score + "/10) indica dipendenza fisica bassa: probabilmente il tuo fumo è più legato a situazioni e abitudini che ad astinenza fisica vera e propria. Punta sui piani se-allora più che sull'aspettarti sintomi fisici forti.";
+    if(score <= 5) return "Il tuo punteggio Fagerström (" + score + "/10) indica dipendenza media: probabilmente convivono componente fisica e comportamentale. Vale la pena affrontarle entrambe.";
+    if(score <= 7) return "Il tuo punteggio Fagerström (" + score + "/10) indica dipendenza alta: è probabile un'astinenza fisica reale, specie al mattino. Parlane col medico per una terapia farmacologica adeguata, non solo tecniche comportamentali.";
+    return "Il tuo punteggio Fagerström (" + score + "/10) indica dipendenza molto alta. Da solo probabilmente non basta: la combinazione farmaco + supporto professionale è particolarmente indicata nel tuo caso.";
+  }
+
+  function openCheckin(){
+    selectedMood = null;
+    selectedRelapse = null;
+    document.querySelectorAll('#moodChips .chip, #relapseChips .chip').forEach(c=>c.classList.remove('selected'));
+    $('checkinSummary').style.display = 'none';
+    updateCheckinTrend();
+    $('checkinOverlay').classList.add('active');
+    $('checkinOverlay').scrollTop = 0;
+  }
+
+  function closeCheckinOverlay(){
+    $('checkinOverlay').classList.remove('active');
+  }
+
+  function updateCheckinTrend(){
+    const el = $('checkinTrend');
+    if(state.checkins.length < 3){
+      el.textContent = 'Dopo qualche check-in vedrai qui l\'andamento nel tempo, non solo il singolo giorno.';
+      return;
+    }
+    const last5 = state.checkins.slice(-5);
+    const diff = last5.filter(x => x.mood === 'Difficile').length;
+    const relapses = last5.filter(x => x.relapse === 'Sì').length;
+    let msg = 'Ultimi ' + last5.length + ' check-in: ' + diff + ' segnati come "difficile"';
+    if(relapses > 0) msg += ', ' + relapses + ' con una ricaduta.';
+    else msg += ', nessuna ricaduta segnata.';
+    el.textContent = msg;
+  }
+
+  document.querySelectorAll('#moodChips .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#moodChips .chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedMood = chip.dataset.mood;
+      maybeShowCheckinSummary();
+    });
+  });
+  document.querySelectorAll('#relapseChips .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#relapseChips .chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedRelapse = chip.dataset.relapse;
+      maybeShowCheckinSummary();
+    });
+  });
+
+  function maybeShowCheckinSummary(){
+    if(!selectedMood || !selectedRelapse) return;
+    const parts = [];
+
+    if(selectedRelapse === 'Sì'){
+      parts.push('Hai segnato una sigaretta. Non riparte da zero il conteggio dei giorni che hai già fatto — riparte da adesso, non da domani.');
+    } else if(selectedMood === 'Difficile'){
+      parts.push('Giornata difficile ma senza ricaduta: è esattamente il tipo di giorno che conta di più, anche se non lo sembra mentre lo vivi.');
+    } else {
+      parts.push('Giornata gestita bene. Continua a segnare, i dati contano più nei giorni facili che in quelli difficili — è lì che si vede il pattern reale.');
+    }
+
+    const entries = Object.entries(state.triggers || {});
+    if(entries.length >= 3){
+      entries.sort((a,b)=>b[1]-a[1]);
+      parts.push('Il tuo trigger più frequente resta "' + entries[0][0] + '" — se non hai ancora un piano se-allora per quel caso, è il punto con più leva su cui lavorare.');
+    }
+
+    const fagText = fagerstromTierText(state.settings && state.settings.fagerstrom);
+    if(fagText) parts.push(fagText);
+
+    $('checkinSummaryText').textContent = parts.join(' ');
+    $('checkinSummary').style.display = 'block';
+  }
+
+  $('openCheckin').addEventListener('click', openCheckin);
+  $('closeCheckin').addEventListener('click', closeCheckinOverlay);
+  $('saveCheckin').addEventListener('click', ()=>{
+    if(!selectedMood || !selectedRelapse){
+      toast("Rispondi a entrambe le domande prima di salvare.");
+      return;
+    }
+    state.checkins.push({date: new Date().toISOString(), mood: selectedMood, relapse: selectedRelapse});
+    saveCheckins();
+    closeCheckinOverlay();
+    toast("Check-in salvato.");
+  });
+
+  // ---------- CHAT CONSULENTE ----------
+  const GATE_KEY = 'smk_chat_gate';
+  let chatHistory = [];
+
+  function loadGate(){
+    try{
+      const g = localStorage.getItem(GATE_KEY);
+      if(g) return JSON.parse(g);
+    }catch(e){}
+    return null;
+  }
+
+  function saveGate(url, pass){
+    try{ localStorage.setItem(GATE_KEY, JSON.stringify({url, pass})); }
+    catch(e){ toast("Non sono riuscito a salvare la connessione."); }
+  }
+
+  function buildContext(){
+    const parts = [];
+    if(state.settings){
+      const quitTime = new Date(state.settings.quitDate).getTime();
+      const days = Math.floor((Date.now() - quitTime) / 86400000);
+      parts.push('Giorni senza fumare: ' + Math.max(0, days) + '.');
+      if(state.settings.fagerstrom !== undefined && state.settings.fagerstrom !== null){
+        parts.push('Punteggio Fagerström: ' + state.settings.fagerstrom + '/10.');
+      }
+      if(state.settings.why) parts.push('Motivo personale: ' + state.settings.why);
+    }
+    parts.push('Craving resistiti: ' + state.resisted + ', sigarette fumate durante il tentativo: ' + state.smoked + '.');
+    const entries = Object.entries(state.triggers || {});
+    if(entries.length){
+      entries.sort((a,b)=>b[1]-a[1]);
+      parts.push('Trigger più frequente: ' + entries[0][0] + '.');
+    }
+    if(state.checkins.length){
+      const last = state.checkins[state.checkins.length-1];
+      parts.push('Ultimo check-in: umore "' + last.mood + '", ricaduta: ' + last.relapse + '.');
+    }
+    return parts.join(' ');
+  }
+
+  function renderChatMessages(){
+    const el = $('chatMessages');
+    el.innerHTML = '';
+    chatHistory.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (m.role === 'user' ? 'user' : 'assistant');
+      div.textContent = m.content;
+      el.appendChild(div);
+    });
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function openChat(){
+    $('chatOverlay').classList.add('active');
+    $('chatOverlay').scrollTop = 0;
+    const gate = loadGate();
+    if(gate && gate.url && gate.pass){
+      $('chatGateView').style.display = 'none';
+      $('chatView').style.display = 'block';
+      if(chatHistory.length === 0){
+        chatHistory.push({role:'assistant', content:'Ciao. Sono qui per parlare di come sta andando — non sostituisco un medico. Da cosa vuoi partire?'});
+        renderChatMessages();
+      }
+    } else {
+      $('chatGateView').style.display = 'flex';
+      $('chatView').style.display = 'none';
+    }
+  }
+
+  $('openChat').addEventListener('click', openChat);
+  $('closeChat').addEventListener('click', ()=> $('chatOverlay').classList.remove('active'));
+
+  $('saveGate').addEventListener('click', ()=>{
+    const url = $('proxyUrl').value.trim();
+    const pass = $('proxyPass').value;
+    if(!url || !pass){ toast("Servono sia URL che password."); return; }
+    saveGate(url, pass);
+    $('chatGateView').style.display = 'none';
+    $('chatView').style.display = 'block';
+    chatHistory = [{role:'assistant', content:'Connesso. Da cosa vuoi partire?'}];
+    renderChatMessages();
+  });
+
+  $('forgetGate').addEventListener('click', ()=>{
+    try{ localStorage.removeItem(GATE_KEY); }catch(e){}
+    chatHistory = [];
+    toast("Connessione dimenticata.");
+    $('chatGateView').style.display = 'flex';
+    $('chatView').style.display = 'none';
+    $('proxyUrl').value = '';
+    $('proxyPass').value = '';
+  });
+
+  async function sendChatMessage(){
+    const input = $('chatInput');
+    const text = input.value.trim();
+    if(!text) return;
+    const gate = loadGate();
+    if(!gate){ toast("Connetti prima il proxy."); return; }
+
+    chatHistory.push({role:'user', content:text});
+    input.value = '';
+    renderChatMessages();
+
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-msg assistant typing';
+    typingDiv.textContent = 'Sta scrivendo...';
+    $('chatMessages').appendChild(typingDiv);
+    $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+
+    try{
+      const resp = await fetch(gate.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-app-password': gate.pass
+        },
+        body: JSON.stringify({
+          messages: chatHistory.map(m => ({role: m.role, content: m.content})),
+          context: buildContext()
+        })
+      });
+      typingDiv.remove();
+      if(!resp.ok){
+        if(resp.status === 401){
+          chatHistory.push({role:'assistant', content:'Password non corretta. Usa "Dimentica connessione" e riprova.'});
+        } else {
+          chatHistory.push({role:'assistant', content:'Il proxy ha risposto con un errore. Riprova tra poco.'});
+        }
+        renderChatMessages();
+        return;
+      }
+      const data = await resp.json();
+      chatHistory.push({role:'assistant', content: data.reply || '(nessuna risposta)'});
+      renderChatMessages();
+    }catch(err){
+      typingDiv.remove();
+      chatHistory.push({role:'assistant', content:'Non riesco a raggiungere il proxy. Controlla connessione e URL.'});
+      renderChatMessages();
+    }
+  }
+
+  $('chatSend').addEventListener('click', sendChatMessage);
+  $('chatInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') sendChatMessage();
   });
 
   // ---------- INIT ----------
