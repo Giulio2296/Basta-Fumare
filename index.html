@@ -376,6 +376,30 @@
     border-color:var(--ember);
     color:var(--ember);
   }
+  .chip-warn{
+    border-style:dashed;
+  }
+
+  .ration-card{
+    background:var(--ember-soft);
+    border:1px solid rgba(232,72,28,0.4);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .ration-card.show{display:block;}
+  .ration-card .lbl{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ember);
+    font-weight:800;
+    margin-bottom:6px;
+    display:block;
+  }
+  .ration-card .txt{font-size:13.5px; line-height:1.55; color:var(--ink);}
+  .ration-card .txt b{color:var(--ember);}
 
   .plan-match{
     background:var(--calm-soft);
@@ -686,7 +710,13 @@
       <div class="chip" data-trigger="Caffè">Caffè</div>
       <div class="chip" data-trigger="Auto/guida">Auto/guida</div>
       <div class="chip" data-trigger="Senza motivo">Senza motivo</div>
+      <div class="chip chip-warn" data-trigger="Sto razionalizzando">Sto razionalizzando</div>
     </div>
+  </div>
+
+  <div class="ration-card" id="rationCard">
+    <span class="lbl">Fermati un secondo</span>
+    <div class="txt">Il pensiero <b>"tanto una non fa niente"</b> o <b>"ho già fumato, ormai è andata"</b> non è una decisione: è il craving travestito da ragionamento. Notalo, non discuterci.<br><br>Se hai già fumato oggi: <b>non conta come sconfitta totale</b>. Riparti dalla prossima sigaretta, non da domani. Più aspetti a riprovare, più il pensiero vince.</div>
   </div>
 
   <div class="plan-match" id="planMatch"><span class="lbl">Il tuo piano per questo momento</span><span class="txt" id="planMatchText"></span></div>
@@ -794,7 +824,7 @@
     "Non stai facendolo da solo per forza. Un farmaco o una telefonata possono raddoppiare le tue probabilità."
   ];
 
-  const TRIGGER_LABELS = ["Stress","Noia","Dopo pasto","Pausa/abitudine","Alcol/social","Caffè","Auto/guida","Senza motivo"];
+  const TRIGGER_LABELS = ["Stress","Noia","Dopo pasto","Pausa/abitudine","Alcol/social","Caffè","Auto/guida","Senza motivo","Sto razionalizzando"];
   const SETTINGS_KEY = 'smk_settings';
   const LOG_KEY = 'smk_log';
 
@@ -1049,6 +1079,9 @@
 
   function updatePlanMatch(){
     const el = $('planMatch');
+    const rationEl = $('rationCard');
+    rationEl.classList.toggle('show', selectedTrigger === 'Sto razionalizzando');
+
     if(!selectedTrigger || !state.settings || !state.settings.plans){
       el.classList.remove('show');
       return;
@@ -1069,6 +1102,7 @@
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
     document.querySelectorAll('.tech-card').forEach(c=>c.classList.remove('open'));
     $('planMatch').classList.remove('show');
+    $('rationCard').classList.remove('show');
     $('moveTimer').textContent = "0:60";
     $('startMove').disabled = false;
     $('startMove').textContent = "Avvia i 60 secondi";
